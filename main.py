@@ -151,7 +151,7 @@ def main():
 if __name__ in {"__main__", "__mp_main__"}:
     ui.run(
         reload=True,
-        port=8080,
+        port=5555,
         show=False,
         reconnect_timeout=10
     )
