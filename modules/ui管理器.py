@@ -365,6 +365,8 @@ class UI管理器:
     #         ui.notify(f'批量测试失败：{str(e)}', type='negative')
     #         print(f"错误详情：{str(e)}")
 
+
+
     async def 批量测试(self):
         """执行批量测试"""
         try:
