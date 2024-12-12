@@ -228,6 +228,143 @@ class UI管理器:
 
 
 
+    # async def 批量测试(self):
+    #     """执行批量测试"""
+    #     try:
+    #         # 初始化统计数据
+    #         self.统计数据 = {
+    #             '偏差合集': [],
+    #             '购买比例合集': [],
+    #             '连对统计': {},
+    #             '连错统计': {}
+    #         }
+            
+    #         生成数量 = int(self.组件['生成数量'].value)
+    #         测试次数 = int(self.组件['测试次数'].value)
+
+    #         if 生成数量 <= 0 or 测试次数 <= 0:
+    #             ui.notify('生成数量和测试次数必须大于0', type='warning')
+    #             return
+
+    #         总结果 = []
+            
+    #         # 在开始前先显示初始信息
+    #         self.组件['批量测试信息区'].value = f"开始执行批量测试...\n当前进度：0/{测试次数}"
+    #         await ui.run_javascript('setTimeout(() => {}, 0)')
+            
+    #         for 当前测试序号 in range(测试次数):
+    #             # 更新进度信息
+    #             self.组件['批量测试信息区'].value = f"正在执行批量测试...\n当前进度：{当前测试序号 + 1}/{测试次数}"
+    #             await ui.run_javascript('setTimeout(() => {}, 0)')
+                
+    #             # 使用时间戳和随机数组合作为种子
+    #             current_seed = int(time.time() * 1000000) + random.randint(1, 1000000) + 当前测试序号
+    #             random.seed(current_seed)
+    #             历史数据 = [f"{random.randint(0, 999):03d}" for _ in range(生成数量)]
+                
+    #             庄实例 = Pick3_庄模板()
+                
+    #             # 执行策略函数
+    #             local_dict = {}
+    #             exec(self.当前策略, globals(), local_dict)
+    #             用户函数 = list(local_dict.values())[0]
+                
+    #             庄实例.执行预测(历史数据, 用户函数)
+                
+    #             # 捕获输出
+    #             output = io.StringIO()
+    #             sys.stdout = output
+    #             庄实例.显示结果()
+    #             sys.stdout = sys.__stdout__
+    #             结果文本 = output.getvalue()
+                
+    #             # 添加测试序号
+    #             总结果.append(f"第{当前测试序号 + 1}次测试结果:\n{结果文本}\n{'=' * 50}\n")
+                
+    #             # 从结果文本中提取数据
+    #             lines = 结果文本.split('\n')
+    #             表格模式 = False
+    #             连对行 = None
+    #             连错行 = None
+                
+    #             中奖次数 = 0
+    #             平均下注数 = 0.0
+                
+    #             for line in lines:
+    #                 if '中奖次数:' in line:
+    #                     try:
+    #                         中奖次数 = int(line.split('(')[0].split(':')[1].strip())
+    #                     except ValueError:
+    #                         print("无法解析中奖次数:", line)
+    #                 elif '平均下注数:' in line:
+    #                     try:
+    #                         平均下注数 = float(line.split(':')[1].strip())
+    #                     except ValueError:
+    #                         print("无法解析平均下注数:", line)
+    #                 elif '统计表格:' in line:
+    #                     表格模式 = True
+    #                 elif 表格模式 and '连对' in line:
+    #                     连对行 = line
+    #                 elif 表格模式 and '连错' in line:
+    #                     连错行 = line
+                
+    #             # 处理连对数据
+    #             if 连对行:
+    #                 parts = 连对行.split()
+    #                 for i in range(1, len(parts)):
+    #                     if parts[i].isdigit():
+    #                         连对长度 = i + 1  # 因为表格从2次开始
+    #                         次数 = int(parts[i])
+    #                         if 连对长度 not in self.统计数据['连对统计']:
+    #                             self.统计数据['连对统计'][连对长度] = 0
+    #                         self.统计数据['连对统计'][连对长度] += 次数
+                
+    #             # 处理连错数据
+    #             if 连错行:
+    #                 parts = 连错行.split()
+    #                 for i in range(1, len(parts)):
+    #                     if parts[i].isdigit():
+    #                         连错长度 = i + 1  # 因为表格从2次开始
+    #                         次数 = int(parts[i])
+    #                         if 连错长度 not in self.统计数据['连错统计']:
+    #                             self.统计数据['连错统计'][连错长度] = 0
+    #                         self.统计数据['连错统计'][连错长度] += 次数
+                
+    #             # 偏差计算
+    #             try:
+    #                 偏差值 = ((中奖次数 / 1000) - (平均下注数 / 1000)) / 生成数量
+    #                 self.统计数据['偏差合集'].append(偏差值)
+    #                 self.统计数据['购买比例合集'].append(平均下注数 / 生成数量)
+    #             except ZeroDivisionError:
+    #                 print("计算偏差时发生除零错误")
+                
+    #         # 计算最终统计结果
+    #         if self.统计数据['偏差合集']:
+    #             最终偏差 = sum(self.统计数据['偏差合集']) / len(self.统计数据['偏差合集'])
+    #             平均购买比例 = sum(self.统计数据['购买比例合集']) / len(self.统计数据['购买比例合集'])
+                
+    #             统计信息 = f"""统计结果:
+    #     实验次数: {len(self.统计数据['偏差合集'])}/{测试次数}
+    #     平均偏差: {最终偏差:.4f}
+    #     平均购买比例: {平均购买比例:.4f}
+
+    #     连对统计:
+    #     {'\n'.join(f'{k}连对在所有测试中共出现: {v}次' for k, v in sorted(self.统计数据['连对统计'].items()))}
+
+    #     连错统计:
+    #     {'\n'.join(f'{k}连错在所有测试中共出现: {v}次' for k, v in sorted(self.统计数据['连错统计'].items()))}
+    #     {'=' * 50}\n"""
+    #         else:
+    #             统计信息 = "没有有效的测试数据可以统计\n" + ('=' * 50) + "\n"
+
+    #         # 显示结果
+    #         self.组件['批量测试信息区'].value = 统计信息 + '\n'.join(总结果)
+    #         ui.notify('批量测试完成', type='positive')
+            
+    #     except Exception as e:
+    #         ui.notify(f'批量测试失败：{str(e)}', type='negative')
+    #         print(f"错误详情：{str(e)}")
+
     async def 批量测试(self):
         """执行批量测试"""
         try:
@@ -279,7 +416,8 @@ class UI管理器:
                 结果文本 = output.getvalue()
                 
                 # 添加测试序号
-                总结果.append(f"第{当前测试序号 + 1}次测试结果:\n{结果文本}\n{'=' * 50}\n")
+                分隔线 = "=" * 50
+                总结果.append(f"第{当前测试序号 + 1}次测试结果:\n{结果文本}\n{分隔线}\n")
                 
                 # 从结果文本中提取数据
                 lines = 结果文本.split('\n')
@@ -342,6 +480,10 @@ class UI管理器:
             if self.统计数据['偏差合集']:
                 最终偏差 = sum(self.统计数据['偏差合集']) / len(self.统计数据['偏差合集'])
                 平均购买比例 = sum(self.统计数据['购买比例合集']) / len(self.统计数据['购买比例合集'])
+                分隔线 = "=" * 50
+                
+                连对统计文本 = '\n'.join(f'{k}连对在所有测试中共出现: {v}次' for k, v in sorted(self.统计数据['连对统计'].items()))
+                连错统计文本 = '\n'.join(f'{k}连错在所有测试中共出现: {v}次' for k, v in sorted(self.统计数据['连错统计'].items()))
                 
                 统计信息 = f"""统计结果:
         实验次数: {len(self.统计数据['偏差合集'])}/{测试次数}
@@ -349,13 +491,14 @@ class UI管理器:
         平均购买比例: {平均购买比例:.4f}
 
         连对统计:
-        {'\n'.join(f'{k}连对在所有测试中共出现: {v}次' for k, v in sorted(self.统计数据['连对统计'].items()))}
+        {连对统计文本}
 
         连错统计:
-        {'\n'.join(f'{k}连错在所有测试中共出现: {v}次' for k, v in sorted(self.统计数据['连错统计'].items()))}
-        {'=' * 50}\n"""
+        {连错统计文本}
+        {分隔线}\n"""
             else:
-                统计信息 = "没有有效的测试数据可以统计\n" + ('=' * 50) + "\n"
+                分隔线 = "=" * 50
+                统计信息 = f"没有有效的测试数据可以统计\n{分隔线}\n"
 
             # 显示结果
             self.组件['批量测试信息区'].value = 统计信息 + '\n'.join(总结果)
