@@ -1,0 +1,65 @@
+/* 面板基础样式 */
+.q-splitter__panel {
+    min-width: 30% !important;
+}
+
+/* 滚动条样式 */
+*::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* 分隔条样式 */
+.q-splitter__separator {
+    background: #e0e0e0;
+    width: 4px;
+    cursor: col-resize;
+    z-index: 1000;
+}
+
+.q-splitter__separator:hover {
+    background: #2196F3;
+}
+
+/* 确保分隔条在合适的位置 */
+.q-splitter__panel.q-splitter__before,
+.q-splitter__panel.q-splitter__after {
+    min-width: 30% !important;
+}
+
+/* 在你的CSS文件中添加这些规则 */
+.textarea-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+.textarea-container textarea {
+    flex: 1;
+    width: 100%;
+    min-height: 600px;
+    margin: 0;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.textarea-container .q-textarea {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
