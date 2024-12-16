@@ -30,7 +30,6 @@ class Pick3_庄模板:
         self.平均下注率 = 0.0 
         self.连对统计 = {}  # 连对次数统计  
         self.连错统计 = {}  # 连错次数统计
-        self.概率期望 = 0.0
 
     def 动作(self, 结果, 预测集合):
         self.投注结果.append(结果)
@@ -112,9 +111,6 @@ class Pick3_庄模板:
         self.最长连对 = max(self.中次数结果统计.keys(), default=0)
         self.最长连错 = max(self.不中次数结果统计.keys(), default=0)
 
-        # 概率期望
-        self.概率期望 = round(self.中奖率 - self.平均下注率, 2) # 结果四舍五入到小数点后两位。
-
     def 计算预测平均数(self):
         # 只统计预测集合非空且实际进行投注的情况
         有效预测数量 = [
@@ -138,9 +134,8 @@ class Pick3_庄模板:
         print(f"不买次数: {self.不买次数} ({(self.不买次数/self.总次数 if self.总次数 > 0 else 0)})")
         print(f"连错次数统计: {self.连错统计}")
         print(f"连对次数统计: {self.连对统计}")
-        # print(f"平均下注率: {self.平均下注率}")
-        # print(f"参与率: {self.参与率}")
-        print(f"概率期望=（中奖率 - 平均下注率 ）: {self.概率期望}")
+        print(f"平均下注率: {self.平均下注率}")
+        print(f"参与率: {self.参与率}")
 
 
 
