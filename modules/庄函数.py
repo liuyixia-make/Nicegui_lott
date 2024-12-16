@@ -113,7 +113,7 @@ class Pick3_庄模板:
         self.最长连错 = max(self.不中次数结果统计.keys(), default=0)
 
         # 概率期望
-        self.概率期望 = round(self.中奖率 - self.平均下注率, 2) # 结果四舍五入到小数点后两位。
+        self.概率期望 = round(self.中奖率 - self.平均下注率, 3) # 结果四舍五入到小数点后两位。
 
     def 计算预测平均数(self):
         # 只统计预测集合非空且实际进行投注的情况
