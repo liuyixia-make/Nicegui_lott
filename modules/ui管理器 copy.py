@@ -15,12 +15,11 @@ class UI管理器:
         import io
         import sys
         self.数据 = []  # 存储生成的数据
-        self.显示状态 = False  # 控制数据显示区域的显示状态
+        self.显示状态 = True  # 控制数据显示区域的显示状态
         self.当前策略 = 默认策略代码
         self.组件 = {}  # 存储UI组件引用
         self.偏差列表 = []
         self.进度条 = None  # 初始化进度条属性
-
 
         # 添加新的数据结构
         self.统计数据 = {

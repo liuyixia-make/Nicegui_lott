@@ -57,9 +57,10 @@ def main():
                         with ui.row().classes('w-full items-center justify-between'):
                             ui.label('数据显示:')
                             with ui.row().classes('gap-2'):
-                                显示切换按钮 = ui.button('隐藏数据', on_click=lambda: ui管理.切换显示())
+                                显示切换按钮 = ui.button('显示数据', on_click=lambda: ui管理.切换显示())
                                 ui.button('清空数据', on_click=lambda: ui管理.清空数据()).props('outline')
                         显示区域 = ui.textarea('').style('width: 100%; min-height: 100px; resize: vertical;').props('readonly outlined')
+                        显示区域.set_visibility(False)  # 创建后立即设置为隐藏
 
                     # ------- 左中部分（策略函数编辑）-------
                     with ui.card().classes(CARD_BASIC):
@@ -71,6 +72,15 @@ def main():
                             ui.button('确认策略', on_click=lambda: ui管理.更新策略())
                             ui.button('恢复默认', on_click=lambda: ui管理.恢复默认策略())
 
+                    # 添加分隔线
+                    ui.separator()
+                    # ------- 左下部分（策略函数判断）-------
+                    # 添加策略函数测试结果显示区
+                    ui.label('策略函数测试结果').classes(CARD_TITLE)
+                    策略测试结果 = ui.textarea(value='策略函数测试结果将显示在这里...'
+                    ).style('width: 100%; min-height: 80px; resize: vertical;').props('readonly outlined')
+            
+            
             # 右面板
             with splitter.after:
                 with ui.column().classes(W_FULL).style('min-width: 100%; width: 100%; min-height: 100px; resize: vertical;'):
@@ -135,6 +145,8 @@ def main():
         手动输入区域=手动输入区域,
         生成数量=生成数量,
         测试次数=测试次数,
+        策略测试结果=策略测试结果,
+
     )
 
     # ====================== 初始化 ======================
