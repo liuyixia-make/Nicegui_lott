@@ -9,6 +9,8 @@ class Pick3_庄模板:
         self.平均预测数量 = 0  # 存储每期预测的号码数量
         self.中次数结果统计 = {}  # 连续中奖次数统计
         self.不中次数结果统计 = {}  # 连续不中次数统计
+        self.中次数概率统计 = {}  # 连续中奖次数统计
+        self.不中次数概率统计 = {}  # 连续不中次数统计
         self.总次数 = 0
 
 
@@ -89,24 +91,23 @@ class Pick3_庄模板:
             if 实际购买结果[i] == 当前符号:  # 如果与前一个相同
                 连续次数 += 1
             else:  # 如果与前一个不同
-                if 连续次数 >= 2:  # 只统计2次及以上的
-                    if 当前符号 == 'W':
-                        self.中次数结果统计[连续次数] = self.中次数结果统计.get(连续次数, 0) + 1
-                        self.连对统计[连续次数] = self.连对统计.get(连续次数, 0) + 1
-                    elif 当前符号 == 'L':
-                        self.不中次数结果统计[连续次数] = self.不中次数结果统计.get(连续次数, 0) + 1
-                        self.连错统计[连续次数] = self.连错统计.get(连续次数, 0) + 1
+                # 删除 if 连续次数 >= 2 的判断，改为：
+                if 当前符号 == 'W':
+                    self.中次数结果统计[连续次数] = self.中次数结果统计.get(连续次数, 0) + 1
+                    self.连对统计[连续次数] = self.连对统计.get(连续次数, 0) + 1
+                elif 当前符号 == 'L':
+                    self.不中次数结果统计[连续次数] = self.不中次数结果统计.get(连续次数, 0) + 1
+                    self.连错统计[连续次数] = self.连错统计.get(连续次数, 0) + 1
                 当前符号 = 实际购买结果[i]
                 连续次数 = 1
         
         # 处理最后一组连续结果
-        if 连续次数 >= 2:
-            if 当前符号 == 'W':
-                self.中次数结果统计[连续次数] = self.中次数结果统计.get(连续次数, 0) + 1
-                self.连对统计[连续次数] = self.连对统计.get(连续次数, 0) + 1
-            elif 当前符号 == 'L':
-                self.不中次数结果统计[连续次数] = self.不中次数结果统计.get(连续次数, 0) + 1
-                self.连错统计[连续次数] = self.连错统计.get(连续次数, 0) + 1
+        if 当前符号 == 'W':
+            self.中次数结果统计[连续次数] = self.中次数结果统计.get(连续次数, 0) + 1
+            self.连对统计[连续次数] = self.连对统计.get(连续次数, 0) + 1
+        elif 当前符号 == 'L':
+            self.不中次数结果统计[连续次数] = self.不中次数结果统计.get(连续次数, 0) + 1
+            self.连错统计[连续次数] = self.连错统计.get(连续次数, 0) + 1
         
         # 查找最长连续次数
         self.最长连对 = max(self.中次数结果统计.keys(), default=0)
@@ -114,6 +115,23 @@ class Pick3_庄模板:
 
         # 概率期望
         self.概率期望 = round(self.中奖率 - self.平均下注率, 3) # 结果四舍五入到小数点后两位。
+        # 处理概率 ↓
+        # 在统计方法末尾修改计算概率的代码
+        总中奖次数 = sum(self.中次数结果统计.values())
+        总不中次数 = sum(self.不中次数结果统计.values())
+        
+        # 计算中奖概率（转换为小数形式）
+        self.中次数概率统计.clear()
+        for 次数, 频次 in self.中次数结果统计.items():
+            概率 = round(频次 / 总中奖次数, 3) if 总中奖次数 > 0 else 0  # 直接使用小数，保留3位
+            self.中次数概率统计[次数] = 概率
+        
+        # 计算不中概率（转换为小数形式）
+        self.不中次数概率统计.clear()
+        for 次数, 频次 in self.不中次数结果统计.items():
+            概率 = round(频次 / 总不中次数, 3) if 总不中次数 > 0 else 0  # 直接使用小数，保留3位
+            self.不中次数概率统计[次数] = 概率
+
 
     def 计算预测平均数(self):
         # 只统计预测集合非空且实际进行投注的情况
@@ -127,6 +145,56 @@ class Pick3_庄模板:
             return 0
         return int(sum(有效预测数量) / len(有效预测数量))
     
+    def 生成对比表格(self):
+        # 获取实际统计中的最大次数
+        最大次数 = max(
+            max(self.中次数结果统计.keys(), default=0),
+            max(self.不中次数结果统计.keys(), default=0)
+        )
+        
+        # 使用平均下注率作为单次中奖概率
+        单次中奖概率 = self.平均下注率
+        单次不中概率 = 1 - self.平均下注率  # 单次不中概率是平均下注率的补数
+        
+        # 计算理论概率
+        中奖理论概率 = {}
+        不中理论概率 = {}
+        
+        # 计算连对的理论概率
+        中奖总和 = sum((单次中奖概率 ** n) * (1 - 单次中奖概率) for n in range(1, 最大次数 + 1))
+        for n in range(1, 最大次数 + 1):
+            中奖理论概率[n] = (单次中奖概率 ** n) * (1 - 单次中奖概率) / 中奖总和
+        
+        # 计算连错的理论概率
+        不中总和 = sum((单次不中概率 ** n) * (1 - 单次不中概率) for n in range(1, 最大次数 + 1))
+        for n in range(1, 最大次数 + 1):
+            不中理论概率[n] = (单次不中概率 ** n) * (1 - 单次不中概率) / 不中总和
+        
+        # 创建对比数据
+        data = {
+            '连对实际概率': [self.中次数概率统计.get(i, 0) for i in range(1, 最大次数 + 1)],
+            '连对理论概率': [中奖理论概率.get(i, 0) for i in range(1, 最大次数 + 1)],
+            '连对差异': [self.中次数概率统计.get(i, 0) - 中奖理论概率.get(i, 0) for i in range(1, 最大次数 + 1)],
+            '连错实际概率': [self.不中次数概率统计.get(i, 0) for i in range(1, 最大次数 + 1)],
+            '连错理论概率': [不中理论概率.get(i, 0) for i in range(1, 最大次数 + 1)],
+            '连错差异': [self.不中次数概率统计.get(i, 0) - 不中理论概率.get(i, 0) for i in range(1, 最大次数 + 1)]
+        }
+        
+        # 创建DataFrame并设置显示格式
+        df = pd.DataFrame(data).T
+        df.columns = [f'{i}次' for i in range(1, 最大次数 + 1)]
+        print(f"\n单次中奖概率: {单次中奖概率:.3f}")
+        print(f"单次不中概率: {单次不中概率:.3f}")
+        print("\n概率对比表格:")
+        pd.set_option('display.unicode.east_asian_width', True)
+        pd.set_option('display.colheader_justify', 'center')
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.width', None)
+        pd.set_option('display.float_format', '{:.3f}'.format)  # 设置浮点数格式为三位小数
+        
+        # 打印表格
+        print(df.to_string(justify='center'))
+
     def 显示结果(self):
         # 打印详细统计
         print(f"详细统计:")
@@ -141,32 +209,35 @@ class Pick3_庄模板:
         # print(f"平均下注率: {self.平均下注率}")
         # print(f"参与率: {self.参与率}")
         print(f"概率期望=（中奖率 - 平均下注率 ）: {self.概率期望}")
+        self.生成对比表格()
 
 
+        # # 找出最大次数并创建统计表格
+        # 最大次数 = max(
+        #     max(self.中次数结果统计.keys(), default=0),
+        #     max(self.不中次数结果统计.keys(), default=0)
+        # )
 
-        # 找出最大次数并创建统计表格
-        最大次数 = max(
-            max(self.中次数结果统计.keys(), default=0),
-            max(self.不中次数结果统计.keys(), default=0)
-        )
-        
-        # 创建数据字典
-        data = {
-            '连对': [self.连对统计.get(i, 0) for i in range(2, 最大次数 + 1)],
-            '连错': [self.连错统计.get(i, 0) for i in range(2, 最大次数 + 1)]
-        }
-        
-        # 创建DataFrame并打印带表格线的表格
-        df = pd.DataFrame(data).T
-        df.columns = [f'{i}次' for i in range(2, 最大次数 + 1)]
-        print("\n统计表格:")
-        pd.set_option('display.unicode.east_asian_width', True)  # 处理中文对齐
-        pd.set_option('display.colheader_justify', 'center')    # 列标题居中
-        pd.set_option('display.max_columns', None)              # 显示所有列
-        pd.set_option('display.width', None)                    # 不限制宽度
-        
-        # 打印表格
-        print(df.to_string(justify='center'))
+        # # 创建数据字典
+        # data = {
+        #     '连对次数': [self.连对统计.get(i, 0) for i in range(1, 最大次数 + 1)],
+        #     '连对概率': [self.中次数概率统计.get(i, 0) for i in range(1, 最大次数 + 1)],
+        #     '连错次数': [self.连错统计.get(i, 0) for i in range(1, 最大次数 + 1)],
+        #     '连错概率': [self.不中次数概率统计.get(i, 0) for i in range(1, 最大次数 + 1)]
+        # }
+
+        # # 创建DataFrame并打印带表格线的表格
+        # df = pd.DataFrame(data).T
+        # df.columns = [f'{i}次' for i in range(1, 最大次数 + 1)]
+        # print("\n统计表格:")
+        # pd.set_option('display.unicode.east_asian_width', True)
+        # pd.set_option('display.colheader_justify', 'center')
+        # pd.set_option('display.max_columns', None)
+        # pd.set_option('display.width', None)
+        # pd.set_option('display.float_format', '{:.3f}'.format)  # 设置浮点数格式为三位小数
+
+        # # 打印表格
+        # print(df.to_string(justify='center'))
 
     def 获取统计结果(self):
         """返回统计结果字典"""

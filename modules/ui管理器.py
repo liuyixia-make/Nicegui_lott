@@ -142,11 +142,31 @@ class UI管理器:
     
     # 获取策略函数部分  ↓
     # 功能: 更新当前策略为用户在文本区域输入的代码。
+    # def 更新策略(self):
+    #     """更新策略函数"""
+    #     self.当前策略 = self.组件['策略代码'].value
+    #     ui.notify('策略函数已更新')
+    #     self.更新状态显示()
     def 更新策略(self):
         """更新策略函数"""
-        self.当前策略 = self.组件['策略代码'].value
-        ui.notify('策略函数已更新')
-        self.更新状态显示()
+        try:
+            # 生成测试数据
+            测试数据 = [f"{random.randint(0, 999):03d}" for _ in range(100)]
+            
+            # 获取策略函数列表和函数名列表
+            策略代码 = self.组件['策略代码'].value
+            策略函数列表, 函数名列表 = self.获取策略函数列表(策略代码)
+            
+            # 测试策略函数
+            self.综合策略(测试数据, 策略函数列表, 函数名列表)
+            
+            # 更新当前策略
+            self.当前策略 = 策略代码
+            ui.notify('策略函数已更新')
+            self.更新状态显示()
+            
+        except Exception as e:
+            ui.notify(f'策略更新失败: {str(e)}', type='error')
     # 功能: 将策略代码区域恢复为默认策略代码
     def 恢复默认策略(self):
         """恢复默认策略"""
@@ -160,7 +180,118 @@ class UI管理器:
             if callable(value) and value.__class__.__name__ == 'function':
                 return value
         raise ValueError("未找到任何函数定义")
+    def 综合策略(self, 历史数据, 策略函数列表, 函数名列表):
+        """接收历史数据和多个策略函数，返回合并的集合"""
+        综合结果 = set()
+        测试结果 = [f"当前共有 {len(策略函数列表)} 个策略函数：\n"]  # 添加函数总数
+        
+        for i, (策略函数, 函数名) in enumerate(zip(策略函数列表, 函数名列表)):
+            try:
+                结果 = 策略函数(历史数据)
+                
+                # 验证返回结果的格式
+                if not isinstance(结果, (list, set)):
+                    raise ValueError("策略函数必须返回列表或集合")
+                
+                # 验证号码格式
+                for 号码 in 结果:
+                    if not isinstance(号码, str) or len(号码) != 3 or not 号码.isdigit():
+                        raise ValueError(f"无效的号码格式: {号码}")
+                
+                综合结果.update(结果)
+                测试结果.append(f"{函数名}: ✓")
+                
+            except Exception as e:
+                测试结果.append(f"{函数名}: ✗ (错误: {str(e)})")
+        
+        # 更新测试结果显示
+        self.组件['策略测试结果'].value = '\n'.join(测试结果)
+        return list(综合结果)
+    # test
+    def 获取策略函数列表(self, 策略代码):
+        """从策略代码中提取所有策略函数"""
+        策略函数列表 = []
+        函数名列表 = []
+        
+        # 按两个换行符分割多个函数
+        策略代码列表 = 策略代码.split('\n\n')
+        
+        for 单个策略代码 in 策略代码列表:
+            if 单个策略代码.strip():
+                try:
+                    # 执行策略代码
+                    local_dict = {}
+                    exec(单个策略代码, globals(), local_dict)
+                    
+                    # 获取策略函数
+                    for name, value in local_dict.items():
+                        if callable(value) and value.__class__.__name__ == 'function':
+                            策略函数列表.append(value)
+                            函数名列表.append(name)
+                            break
+                except Exception as e:
+                    print(f"策略函数提取失败: {str(e)}")
+        
+        return 策略函数列表, 函数名列表
+
     # 获取策略函数部分  ↑
+    
+    # def 执行庄策略(self):
+    #     """执行庄策略"""
+    #     try:
+    #         if not self.组件['显示区域'].value.strip():
+    #             ui.notify('请先输入历史数据', type='warning')
+    #             return
+
+    #         原始文本 = self.组件['显示区域'].value.strip()
+    #         清理文本 = 原始文本.strip('[]')
+    #         历史数据 = [x.strip().strip("'\"") for x in 清理文本.split(',') if x.strip().strip("'\"")]
+            
+    #         庄实例 = Pick3_庄模板()
+            
+    #         # 处理策略代码的缩进
+    #         策略代码行 = self.当前策略.strip().split('\n')
+    #         正确缩进代码 = []
+    #         for i, 行 in enumerate(策略代码行):
+    #             if i == 0:  # 函数定义行
+    #                 正确缩进代码.append(行)
+    #             else:  # 函数体需要缩进
+    #                 if 行.strip():  # 如果不是空行
+    #                     正确缩进代码.append('    ' + 行)  # 添加4个空格的缩进
+    #                 else:
+    #                     正确缩进代码.append(行)
+            
+    #         处理后的代码 = '\n'.join(正确缩进代码)
+            
+    #         local_dict = {}
+    #         # 在执行前打印处理后的代码，方便调试
+    #         print("执行的代码：")
+    #         print(处理后的代码)
+    #         exec(处理后的代码, globals(), local_dict)
+            
+    #         # 获取第一个函数对象
+    #         for value in local_dict.values():
+    #             if callable(value) and value.__class__.__name__ == 'function':
+    #                 用户函数 = value
+    #                 break
+    #         else:
+    #             raise ValueError("未找到任何函数定义")
+            
+    #         庄实例.执行预测(历史数据, 用户函数)
+            
+    #         output = io.StringIO()
+    #         sys.stdout = output
+    #         庄实例.显示结果()
+    #         sys.stdout = sys.__stdout__
+    #         结果文本 = output.getvalue()
+            
+    #         self.组件['运行结果区'].value = 结果文本
+    #         ui.notify('策略执行成功', type='positive')
+            
+    #     except Exception as e:
+    #         ui.notify(f'执行失败：{str(e)}', type='negative')
+    
+    
     
     def 执行庄策略(self):
         """执行庄策略"""
@@ -175,35 +306,17 @@ class UI管理器:
             
             庄实例 = Pick3_庄模板()
             
-            # 处理策略代码的缩进
-            策略代码行 = self.当前策略.strip().split('\n')
-            正确缩进代码 = []
-            for i, 行 in enumerate(策略代码行):
-                if i == 0:  # 函数定义行
-                    正确缩进代码.append(行)
-                else:  # 函数体需要缩进
-                    if 行.strip():  # 如果不是空行
-                        正确缩进代码.append('    ' + 行)  # 添加4个空格的缩进
-                    else:
-                        正确缩进代码.append(行)
+            # 获取策略函数列表和函数名列表
+            策略函数列表, 函数名列表 = self.获取策略函数列表(self.当前策略)
             
-            处理后的代码 = '\n'.join(正确缩进代码)
+            # 使用综合策略获取结果
+            综合结果 = self.综合策略(历史数据, 策略函数列表, 函数名列表)
             
-            local_dict = {}
-            # 在执行前打印处理后的代码，方便调试
-            print("执行的代码：")
-            print(处理后的代码)
-            exec(处理后的代码, globals(), local_dict)
-            
-            # 获取第一个函数对象
-            for value in local_dict.values():
-                if callable(value) and value.__class__.__name__ == 'function':
-                    用户函数 = value
-                    break
-            else:
-                raise ValueError("未找到任何函数定义")
-            
-            庄实例.执行预测(历史数据, 用户函数)
+            # 创建一个新的策略函数，返回综合结果
+            def 综合策略函数(历史数据):
+                return 综合结果
+                
+            庄实例.执行预测(历史数据, 综合策略函数)
             
             output = io.StringIO()
             sys.stdout = output
@@ -216,10 +329,6 @@ class UI管理器:
             
         except Exception as e:
             ui.notify(f'执行失败：{str(e)}', type='negative')
-    
-    
-    
-
 
 
 
@@ -407,12 +516,19 @@ class UI管理器:
                 
                 庄实例 = Pick3_庄模板()
                 
-                # 执行策略函数
-                local_dict = {}
-                exec(self.当前策略, globals(), local_dict)
-                用户函数 = list(local_dict.values())[0]
+                # [修改部分开始]
+                # 获取策略函数列表和函数名列表
+                策略函数列表, 函数名列表 = self.获取策略函数列表(self.当前策略)
                 
-                庄实例.执行预测(历史数据, 用户函数)
+                # 使用综合策略获取结果
+                综合结果 = self.综合策略(历史数据, 策略函数列表, 函数名列表)
+                
+                # 创建一个新的策略函数，返回综合结果
+                def 综合策略函数(历史数据):
+                    return 综合结果
+                
+                庄实例.执行预测(历史数据, 综合策略函数)
+                # [修改部分结束]
                 
                 # 捕获输出
                 output = io.StringIO()

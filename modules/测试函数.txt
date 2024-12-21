@@ -1,0 +1,33 @@
+def 基础策略(历史数据):
+    # 生成所有可能的三位数组合（000-999）
+    所有可能 = []
+    for i in range(10):
+        for j in range(10):
+            for k in range(10):
+                号码 = f"{i}{j}{k}"
+                所有可能.append(号码)
+    
+    # 只返回前500个组合
+    return 所有可能[:500]
+
+def 奇数策略(历史数据):
+    # 生成所有奇数组合
+    奇数可能 = []
+    for i in range(1, 10, 2):
+        for j in range(1, 10, 2):
+            for k in range(1, 10, 2):
+                号码 = f"{i}{j}{k}"
+                奇数可能.append(号码)
+    return 奇数可能
+
+
+
+def 偶数策略(历史数据):
+    # 生成所有偶数组合
+    偶数可能 = []
+    for i in range(0, 10, 2):
+        for j in range(0, 10, 2):
+            for k in range(0, 10, 2):
+                号码 = f"{i}{j}{k}"
+                偶数可能.append(号码)
+    return 偶数可能
